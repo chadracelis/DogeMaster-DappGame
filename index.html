@@ -1,0 +1,247 @@
+<html>
+    <head>
+        <title>Blockchain Game</title>
+        <script src="https://cdn.jsdelivr.net/npm/phaser@3.15.1/dist/phaser.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.0.0-beta.36/dist/web3.min.js"></script>
+        <script src="eth.js"></script>
+    </head>
+
+    <body>
+        <h1><strong>Doge Master</strong></h1>
+        <script>
+
+            var cursors;
+            var dog;
+            var crates;
+            var coinTimer;
+            var score = 0;
+            var scoreText;
+            var secondsLeft = 60;
+            var timeLeftText;
+            var timeLeftTimer;
+            var gameOver = false;
+            var coinsSent = false;
+
+            var config = {
+                width: 1000,
+                height: 600,
+                type: Phaser.AUTO, 
+                scene: {
+                    preload: gamePreload,
+                    create: gameCreate,
+                    update: gameUpdate
+                },
+
+                physics: {
+                    default: "arcade", 
+                    arcade: {
+                        gravity: {y:800},
+                        debug: false
+                    }
+                }
+            }
+
+            function gamePreload() {
+                console.log('Game is loading assets');
+                this.load.image("dog", "assets/dog.png");
+                this.load.image("crate", "assets/crate.png");
+                this.load.image("background", "assets/background.jpg");
+                this.load.image("dogecoin", "assets/doge2.png");
+
+                // Load dog animation
+                this.load.image("run_frame_1", "assets/dog/Run (1).png");
+                this.load.image("run_frame_2", "assets/dog/Run (2).png");
+                this.load.image("run_frame_3", "assets/dog/Run (3).png");
+                this.load.image("run_frame_4", "assets/dog/Run (4).png");
+                this.load.image("run_frame_5", "assets/dog/Run (5).png");
+                this.load.image("run_frame_6", "assets/dog/Run (6).png");
+                this.load.image("run_frame_7", "assets/dog/Run (7).png");
+                this.load.image("run_frame_8", "assets/dog/Run (8).png");
+
+                this.load.image("idle_frame_1", "assets/dog/Idle (1).png");
+                this.load.image("idle_frame_2", "assets/dog/Idle (2).png");
+                this.load.image("idle_frame_3", "assets/dog/Idle (3).png");
+                this.load.image("idle_frame_4", "assets/dog/Idle (4).png");
+                this.load.image("idle_frame_5", "assets/dog/Idle (5).png");
+                this.load.image("idle_frame_6", "assets/dog/Idle (6).png");
+                this.load.image("idle_frame_7", "assets/dog/Idle (7).png");
+                this.load.image("idle_frame_8", "assets/dog/Idle (8).png");
+                this.load.image("idle_frame_9", "assets/dog/Idle (9).png");
+                this.load.image("idle_frame_10", "assets/dog/Idle (10).png");
+            
+
+            }
+
+            function gameCreate() {
+                console.log('Game is setting up assets');
+
+                // create background
+                this.add.image(500, 250, "background");
+
+                // create the dog
+                dog = this.physics.add.sprite(100, 50, "dog");
+                dog.body.setSize(400, 450, 10 , 0);
+                dog.scaleX = 0.15;
+                dog.scaleY = dog.scaleX;
+
+                // create the crates
+                crates = this.physics.add.staticGroup();
+
+                // floor
+                crates.create(40, 565, "crate");
+                crates.create(115, 565, "crate");
+                crates.create(185, 565, "crate");
+                crates.create(260, 565, "crate");
+                crates.create(335, 565, "crate");
+                crates.create(410, 565, "crate");
+                crates.create(962, 565, "crate");
+
+                // floating platforms
+                crates.create(485, 420, "crate");
+                crates.create(100, 200, "crate");
+                crates.create(300, 280, "crate");
+                crates.create(560, 175, "crate");
+                crates.create(690, 310, "crate");
+                crates.create(790, 460, "crate");
+                crates.create(790, 100, "crate");
+                crates.create(880, 310, "crate");
+
+                // create animations
+                this.anims.create({
+                    key: "dog_run",
+                    frames: [
+                        {key: "run_frame_1"},
+                        {key: "run_frame_2"},
+                        {key: "run_frame_3"},
+                        {key: "run_frame_4"},
+                        {key: "run_frame_5"},
+                        {key: "run_frame_6"},
+                        {key: "run_frame_7"},
+                        {key: "run_frame_8"},
+                        {key: "run_frame_9"},
+                        {key: "run_frame_10"},
+                    ],
+                    frameRate: 10,
+                    repeat: 1
+                });
+
+                this.anims.create({
+                    key: "dog_idle",
+                    frames: [
+                        {key: "idle_frame_1"},
+                        {key: "idle_frame_2"},
+                        {key: "idle_frame_3"},
+                        {key: "idle_frame_4"},
+                        {key: "idle_frame_5"},
+                        {key: "idle_frame_6"},
+                        {key: "idle_frame_7"},
+                        {key: "idle_frame_8"},
+                        {key: "idle_frame_9"},
+                        {key: "idle_frame_10"},
+                    ],
+                    frameRate: 10,
+                    repeat: 1
+                });
+
+                this.physics.add.collider(crates, dog);
+
+                scoreText = this.add.text(16, 16, 
+                                          "Dogecoin Bag: " + score, 
+                                          {fontSize: "24px",
+                                          fill: "white"});
+    
+                timeLeftText = this.add.text(16, 66, 
+                                          secondsLeft + "s Left", 
+                                          {fontSize: "24px",
+                                          fill: "#f00"});
+                                         
+
+                cursors = this.input.keyboard.createCursorKeys();
+
+                coinTimer = this.time.addEvent({
+                    delay: Phaser.Math.Between(0, 3000),
+                    callback: generateCoins,
+                    callbackScope: this,
+                    repeat: -1,
+                });
+
+                timeLeftTimer = this.time.addEvent({
+                    delay: 1000,
+                    callback: updateTimeLeft,
+                    callbackScope: this,
+                    repeat: -1,
+                });
+            }
+
+            function updateTimeLeft() {
+                if(gameOver) {
+                    if(!coinsSent) {
+                        mintAfterGame(score);
+                        coinsSent = true;
+                    }
+                return;
+                };
+
+                secondsLeft -= 1;
+                timeLeftText.setText(secondsLeft + "s Left");
+
+                if(secondsLeft <= 0) {
+                    this.physics.pause();
+                    gameOver = true;
+                }
+            }
+
+            function generateCoins() {
+                var coins = this.physics.add.group({
+                    key: "dogecoin",
+                    repeat: 1,
+                    setXY: {
+                        x: Phaser.Math.Between(0, 1000),
+                        y: -100,
+                        stepX: Phaser.Math.Between(30, 100)
+                    }
+                });
+
+                coins.children.iterate(function(child) {
+                    child.setBounceY(Phaser.Math.FloatBetween(0.4, 1.5));
+                });
+
+                this.physics.add.collider(coins, crates);
+                this.physics.add.overlap(dog, coins, collectCoin, null, this);
+            }
+
+            function collectCoin(dog, coin) {
+                coin.disableBody(true, true);
+                score++;
+                scoreText.setText("Dogecoin Bag: " + score);
+                console.log("You have " + score + " dogecoin!");
+            }
+
+            function gameUpdate() {
+
+                if(cursors.left.isDown) {
+                    dog.setVelocityX(-175);
+                    dog.play("dog_run", true);
+                    dog.flipX = true;
+                }
+                else if(cursors.right.isDown) {
+                    dog.setVelocityX(175);
+                    dog.play("dog_run", true);
+                    dog.flipX = false;
+                }
+                else {
+                    dog.setVelocityX(0);
+                    dog.play("dog_idle", true);
+                }
+
+                if(cursors.up.isDown && dog.body.touching.down) {
+                    dog.setVelocityY(-500);
+                }
+                
+            }
+
+            var game = new Phaser.Game(config);
+        </script>
+    </body>
+
+</html>
