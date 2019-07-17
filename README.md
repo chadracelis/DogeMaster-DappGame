@@ -1,5 +1,6 @@
-Getting Started
-(this project uses truffle framework and phaser library) </br>
+<h2>Getting Started</h2> 
+(this project uses truffle framework and phaser library) 
+<p></p>
 
 •	Before proceeding, make sure you have Truffle and Metamask extension for Google Chrome downloaded  </br>
 •	Clone this repo  </br>
