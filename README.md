@@ -10,3 +10,6 @@ This will also create a build folder with the compiled version of our contracts 
 •	Inside eth.js, replace the abi with the abi found in build/contracts/GameToken.json </br>
 •	Scroll down to line 326 inside eth.js file and replace the contract address with the new deployed contract address </br>
 •	Open index.html with live server (Make sure to have metamask connected to your local server) </br>
+
+<p></p>
+<img src="./game.png" alt="Project">
