@@ -3,7 +3,7 @@
 <p></p>
 
 •	Before proceeding, make sure you have Truffle and Metamask extension for Google Chrome downloaded  </br>
-•	Clone this repo  </br>
+•	Clone this repo and npm install </br>
 •	Go to your new app directory inside terminal and type ‘truffle develop’ to fire up local truffle blockchain. 
 Type ‘compile’ then ‘migrate’ to deploy contracts. A list of contract information should output such as contract address, gas cost, etc. 
 This will also create a build folder with the compiled version of our contracts </br>
