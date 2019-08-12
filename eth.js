@@ -1,8 +1,13 @@
 web3 = new Web3(web3.currentProvider);
 ethereum.enable();
-import GameToken from './build/contracts/GameToken.json';                              
 
-var contract = new web3.eth.Contract(GameToken.abi, "0x2A9c8C4657375C8cE1B0629D055Ba718bFD4ba5A"); // Contract Address
+var abi = [
+    
+ /// Grab ABI from your contract.json file
+    
+];
+
+var contract = new web3.eth.Contract(abi, "/* Contract Address */"); 
 
 console.log(contract);
 
